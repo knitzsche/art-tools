@@ -23,39 +23,59 @@ ingreen=int('0x'+incol[2:4],16)
 cols.append(ingreen)
 inblue=int(incol[4:],16)
 cols.append(inblue)
-#ort colors
+
 cols_sorted = cols.copy()
 cols_sorted.sort()
 #print(hex(cols_sorted[0]),hex(cols_sorted[1]),hex(cols_sorted[2]))
 high = cols_sorted[2]
 mid = cols_sorted[1]
 low = cols_sorted[0]
-#print(red_idx,green_idx,blue_idx)
-#sys.exit()
 
 #set h_col, m_col and l_col 
-
+ranks = {}
 if high == cols[0]:
     h_col = 'red'
-elif high == cols[1]:
-    h_col = 'green'
-elif high == cols[2]:
-    h_col = 'blue'
-if mid == cols[0]:
-    m_col = 'red'
-elif mid == cols[1]:
-    m_col = 'green'
-elif mid == cols[2]:
-    m_col = 'blue'
-if low == cols[0]:
-    l_col = 'red'
-elif low == cols[1]:
-    l_col = 'green'
-elif low == cols[2]:
-    l_col = 'blue'
+    ranks['high'] = 'red'
+    if mid == cols[1]:
+        m_col = 'green'
+        ranks['mid'] = 'green'
+        l_col='blue'
+        ranks['low'] = 'blue'
+    else:
+        m_col = 'blue'
+        ranks['mid'] = 'blue'
+        l_col = 'green'
+        ranks['low'] = 'green'
 
-# we need higher shades, and lower shades
-# we will produce ten shades, including niput color
+if high == cols[1]:
+    h_col = 'green'
+    ranks['high'] = 'green'
+    if mid == cols[0]:
+        m_col = 'red'
+        ranks['mid'] = 'red'
+        l_col='blue'
+        ranks['low'] = 'blue'
+    else:
+        m_col = 'blue'
+        ranks['mid'] = 'blue'
+        l_col = 'red'
+        ranks['low'] = 'red'
+
+if high == cols[2]:
+    h_col = 'blue'
+    ranks['high'] = 'blue'
+    if mid == cols[0]:
+        m_col = 'red'
+        ranks['mid'] = 'red'
+        l_col='green'
+        ranks['low'] = 'green'
+    else:
+        m_col = 'green'
+        ranks['mid'] = 'green'
+        l_col = 'red'
+        ranks['low'] = 'red'
+
+# we need number of higher shades, and lower shades
 num_higher_shades = 0
 num_lower_shades = 0
 
@@ -98,14 +118,13 @@ elif position > 0:
 
 #h2l and h2m are the ratios of the high color to 
 #the low color and the medium col
-h2l = cols[0]/cols[1]
-h2m = cols[0]/cols[2]
-
+h2l = cols_sorted[2]/cols_sorted[0]
+h2m = cols_sorted[2]/cols_sorted[1]
 print(head)
 
 # print lower shades (less light)
 idx = 0
-
+#print("<h2>High: {} Mid {} Low {}</h2>".format(h_col, m_col, l_col))
 lowers = []
 _high = high
 while idx < num_lower_shades:
@@ -114,38 +133,49 @@ while idx < num_lower_shades:
     _mid = int(_high/h2m)
     _low = int(_high/h2l)
     #print(str(hex(_high))[2:],str(hex(_mid))[2:],str(hex(_low))[2:])
-    if _high < 0 or _mid < 0 or _low <0: break
+
+    _h = ''
+    _m = ''
+    _l = '' 
     _col = '#'
-    if _high < 16: _col += '0'
-    if h_col == 'red':
-        _col += str(hex(_high))[2:]
-    if h_col == 'green':
-        _col += str(hex(_high))[2:]
-    if h_col == 'blue':
-        _col += str(hex(_high))[2:]
-    if _mid < 16: _col += '0'
-    if m_col == 'red':
-        _col += str(hex(_mid))[2:]
-    if m_col == 'green':
-        _col += str(hex(_mid))[2:]
-    if m_col == 'blue':
-        _col += str(hex(_mid))[2:]
-    if _low < 16: _col += '0'
-    if l_col == 'red':
-        _col += str(hex(_low))[2:]
-    if l_col == 'green':
-        _col += str(hex(_low))[2:]
-    if l_col == 'blue':
-        _col += str(hex(_low))[2:]
+    if _high < 16: _h = '0' + str(hex(_high))[2:]
+    else: _h = str(hex(_high))[2:]
+    if _mid < 16: _m = '0' + str(hex(_mid))[2:]
+    else: _m = str(hex(_mid))[2:]
+    if _low < 16: _l = '0' + str(hex(_low))[2:]
+    else: _l = str(hex(_low))[2:]
+    if ranks['high'] == 'red':
+        _col += _h
+        if ranks['mid'] == 'green':
+            _col += _m
+            _col += _l
+        else:
+            _col += _l
+            _col += _m
+    elif ranks['mid'] == 'red':
+        _col += _m
+        if ranks['high'] == 'green':
+            _col += _h
+            _col += _l
+        else:
+            _col += _l
+            _col += _h
+    elif ranks['low'] == 'red':
+        _col += _l
+        if ranks['mid'] == 'green':
+            _col += _m
+            _col += _h
+        else:
+            _col += _h
+            _col += _m
     lowers.append('<div style="background:{}"><h1>MB {}</h1></div>'.format(_col,_col))
-    #print('<div style="background:{}"><h1>MB {}</h1></div>'.format(_col,_col))
 
 for i, x in reversed(list(enumerate(lowers))):
     print(x)
 
 #add base color
 col='#'+str(hex(inred))[2:4]+str(hex(ingreen))[2:4]+str(hex(inblue))[2:4]
-#print(col)
+
 print('<div style="background:{}"><h1> BASE {}</h1></div>'.format(col,col))
 
 idx = 0 
@@ -157,29 +187,41 @@ while idx < num_higher_shades:
     _mid = int(_high/h2m)
     _low = int(_high/h2l)
     #print(str(hex(_high))[2:],str(hex(_mid))[2:],str(hex(_low))[2:])
+    _h = ''
+    _m = ''
+    _l = '' 
     _col = '#'
-    if _high < 16: _col += '0'
-    if h_col == 'red':
-        _col += str(hex(_high))[2:]
-    if h_col == 'green':
-        _col += str(hex(_high))[2:]
-    if h_col == 'blue':
-        _col += str(hex(_high))[2:]
-    if _mid < 16: _col += '0'
-    if m_col == 'red':
-        _col += str(hex(_mid))[2:]
-    if m_col == 'green':
-        _col += str(hex(_mid))[2:]
-    if m_col == 'blue':
-        _col += str(hex(_mid))[2:]
-    if _low < 16: _col += '0'
-    if l_col == 'red':
-        _col += str(hex(_low))[2:]
-    if l_col == 'green':
-        _col += str(hex(_low))[2:]
-    if l_col == 'blue':
-        _col += str(hex(_low))[2:]
-    #print(_col)
+    if _high < 16: _h = '0' + str(hex(_high))[2:]
+    else: _h = str(hex(_high))[2:]
+    if _mid < 16: _m = '0' + str(hex(_mid))[2:]
+    else: _m = str(hex(_mid))[2:]
+    if _low < 16: _l = '0' + str(hex(_low))[2:]
+    else: _l = str(hex(_low))[2:]
+    if ranks['high'] == 'red':
+        _col += _h
+        if ranks['mid'] == 'green':
+            _col += _m
+            _col += _l
+        else:
+            _col += _l
+            _col += _m
+    elif ranks['mid'] == 'red':
+        _col += _m
+        if ranks['high'] == 'green':
+            _col += _h
+            _col += _l
+        else:
+            _col += _l
+            _col += _h
+    elif ranks['low'] == 'red':
+        _col += _l
+        if ranks['mid'] == 'green':
+            _col += _m
+            _col += _h
+        else:
+            _col += _h
+            _col += _m
+
     print('<div style="background:{}"><h1>MB {}</h1></div>'.format(_col,_col))
 
 print(end)
